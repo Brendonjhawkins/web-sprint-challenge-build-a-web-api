@@ -1,51 +1,45 @@
 const User = require('./projects-model')
 
 
-async function validateUserId(req, res, next) {
-try {
-    const user = await User.getById(req.params.id)
-     if(!user){
-        res.status(404).json({
-          message: "user not found"
-        })
-     } else {
-        req.user = user
-        next()
-     }
-} catch (err){
-  res.status(500).json({
-    message: "problem finding user"
-  })
-}
-}
-
-function validateUser(req, res, next) {
-const {name} = req.body
-if(!name|| !name.trim()){
-  res.status(400).json({
-    message: 'missing required name field'
-  })
-}else{
-  req.name = name.trim()
-  next()
-}
+async function validateProjectId(req, res, next) { 
+  try {
+      const { id } = req.params
+      const project = await User.get(id)
+      if (project) {
+          req.project = project
+          next()
+      } else {
+          next({
+              status: 404,
+              message: 'project not found'
+          })
+      }
+  } catch (err) {
+      next(err)
+  }
 }
 
-function validatePost(req, res, next) {
-  const {text} = req.body
-  if(!text|| !text.trim()){
-    res.status(400).json({
-      message: 'missing required text field'
-    })
-  }else{
-    req.text = text.trim()
-    next()
+async function validateProject(req, res, next) {
+  const { name, description, completed } = req.body
+  if (!name || !name.trim()) {
+      res.status(400).json({
+          message: 'missing required name field'
+      })
+  } else if (!description || !description.trim()) {
+      res.status(400).json({
+          message: 'missing required description field'
+      })
+  }
+  else {
+      req.name = name.trim()
+      req.description = description.trim()
+      req.completed = completed
+      next()
   }
 }
 
  
 module.exports = {
-validateUserId,
-validateUser,
-validatePost
+validateProject,
+validateProjectId
 }

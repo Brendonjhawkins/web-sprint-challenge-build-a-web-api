@@ -10,12 +10,7 @@ server.use(helmet());
 server.use('/api/projects', logger, projectsRouter);
 // server.use('/api/actions', logger, actionsRouter);
 
-// server.get('/', logger, (req, res) => {
-//   res.send(`
-//     <h2>Lambda Hubs API</h2>
-//     <p>Welcome to the Lambda Hubs API</p>
-//   `);
-// });
+
 
 server.use('*', logger, (req, res, next) => {
   next({ status: 404, message: `${req.method} ${req.originalUrl} not found!` })
@@ -25,6 +20,7 @@ server.use(errorHandling)
 
 module.exports = server;
 
+///////Global middleware/////////
 
 function logger(req, res, next) {
     const timeStamp = new Date().toLocaleString()

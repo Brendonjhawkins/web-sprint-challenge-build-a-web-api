@@ -1,59 +1,50 @@
-const User = require('../users/users-model')
+const Action = require('./actions-model')
 
-function logger(req, res, next) {
-  const timeStamp = new Date().toLocaleString()
-  const method = req.method
-  const url = req.originalUrl
-  console.log(` [${timeStamp}] ${method} to ${url}`)
-  next()
-}
-
-async function validateUserId(req, res, next) {
-try {
-    const user = await User.getById(req.params.id)
-     if(!user){
-        res.status(404).json({
-          message: "user not found"
+async function validateActionId(req, res, next) {
+    try {
+        const action = await Action.get(req.params.id)
+        if (!action) {
+            next({
+                status: 404,
+                message: 'action not found'
+            })
+        } else {
+            req.action = action
+            next()
+        }
+    } catch (err) {
+        res.status(500).json({
+            message: 'problem finding action'
         })
-     } else {
-        req.user = user
+    }
+ }
+
+ async function validateAction(req, res, next) {
+    const { project_id, description, notes, completed } = req.body
+    if (!project_id || !project_id) {
+        res.status(400).json({
+            message: 'missing required project id'
+        })
+    } else if (!description || !description.trim()) {
+        res.status(400).json({
+            message: 'missing required description field'
+        })
+    } else if (!notes || !notes.trim()) {
+        res.status(400).json({
+            message: 'missing required notes field'
+        })
+    }
+    else {
+        req.project_id = project_id
+        req.description = description.trim()
+        req.notes = notes.trim()
+        req.completed = completed
         next()
-     }
-} catch (err){
-  res.status(500).json({
-    message: "problem finding user"
-  })
-}
-}
+    }
 
-function validateUser(req, res, next) {
-const {name} = req.body
-if(!name|| !name.trim()){
-  res.status(400).json({
-    message: 'missing required name field'
-  })
-}else{
-  req.name = name.trim()
-  next()
-}
-}
+ }
 
-function validatePost(req, res, next) {
-  const {text} = req.body
-  if(!text|| !text.trim()){
-    res.status(400).json({
-      message: 'missing required text field'
-    })
-  }else{
-    req.text = text.trim()
-    next()
-  }
-}
-
- 
-module.exports = {
-logger,
-validateUserId,
-validateUser,
-validatePost,
-}
+ module.exports = {
+     validateAction,
+     validateActionId
+ }
